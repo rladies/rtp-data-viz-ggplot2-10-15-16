@@ -5,13 +5,13 @@
 - Once both are installed, open RStudio and run the following lines of code in the Console
 
 ```{r}
-install.packages("ggplot2")
+install.packages("tidyverse")
 ```
 
 and then
 
 ```{r}
-library(ggplot2)
+library(tidyverse)
 ```
 
 - Please bring a fully charged laptop to the workshop
