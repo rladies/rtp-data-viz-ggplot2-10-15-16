@@ -7,6 +7,8 @@ Sign up at https://www.meetup.com/R-Ladies-RTP/events/233728146/.
 While the materials for the workshop are designed for being used at the in-person 
 workshop, all are welcomed to use and reuse them for learning and teaching.
 
+The slides for the workshop can be found here: http://rpubs.com/eamcvey/218880
+
 This workshop assumes no background in R but willingness to learn a scripting
 language.
 

@@ -21,6 +21,8 @@ download.file('https://www.dropbox.com/s/zhmn02ti0ggxdj7/rladies_ggplot2_dataset
               'rladies_ggplot2_datasets.rda')
 ```
 
+- The slides for this workshop can be found here: http://rpubs.com/eamcvey/218880
+
 - If you have not used R and RStudio before, please see the first section of the presentation from the previous meetup for an introduction: http://rpubs.com/minebocek/rladies-dplyr-tidyr
 
 - Please bring a fully charged laptop to the workshop
