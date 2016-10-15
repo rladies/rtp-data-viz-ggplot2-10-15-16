@@ -28,8 +28,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 - All source code at https://github.com/rladies/rtp-data-viz-ggplot2-10-15-16
 
-- Slides at 
-
 ## Datasets
 
 - Datasets for today are here: https://www.dropbox.com/s/zhmn02ti0ggxdj7/rladies_ggplot2_datasets.rda?dl=1
@@ -75,7 +73,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Conceptual ggplot2
 
+## The basics
 
+- map variables to aethestics
+- add "geoms" for visual representation layers
+- scales can be independently managed
+- legends are automatically created
+- statistics are sometimes calculated by geoms...
+
+## Learn more
+
+- ggplot2 book 
 
 # Basic ggplot2 syntax
 
@@ -213,27 +221,281 @@ geom_point(aes(x = ride_date, y = n_rides), color = 'blue')
 
 ## + and %>%
 
-`
-daily_df %>%
-  mutate(day_type = if_else(day_of_week %in% c('Sat', 'Sun'),
+`daily_df %>%`
+  `mutate(day_type = if_else(day_of_week %in% c('Sat', 'Sun'),
                             'Weekend',
-                            'Weekday')) %>%
-ggplot(aes(x = ride_date, y = n_rides, color = day_type)) %>%
-geom_point()
-`
+                            'Weekday')) %>%`
+`ggplot(aes(x = ride_date, y = n_rides, color = day_type)) %>%`
+`geom_point()`
 
-# The power of layers
+## Basic plot exercise
 
-# The power of groups 
+Plot the number of unique routes per day over time, colored by day of week. (n_unique_routes)
+
+## Basic plot exercise
+
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_unique_routes, color = day_of_week)) +
+  geom_point() 
+```
+
+
+
+# The power of layers 
+
+## Basic plot
+
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides)) +
+  geom_point() 
+```
+
+## Two layers!
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides)) +
+  geom_point() +
+  geom_line()
+```
+
+## Iterate on layers
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides)) +
+  geom_point() + 
+  geom_smooth(span = .1) # try changing span
+```
+
+## The power of groups
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point() + 
+  geom_line()
+```
+
+## Now we've got it
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_smooth(span = .2, se = FALSE)
+```
+
+## Control data by layer
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point(data = filter(daily_df, !(day_of_week %in% c('Sat', 'Sun')) & n_rides < 200),
+             size = 5, color = 'gray') +
+  geom_point()
+```
+
+## Control data by layer {.smaller}
+```{r, fig.height = 3}
+
+low_weekdays_df <- daily_df %>%
+  filter(!(day_of_week %in% c('Sat', 'Sun')) & n_rides < 100)
+
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, 
+             color = day_of_week, label = ride_date)) +
+  geom_point(data = low_weekdays_df, size = 5, color = 'gray') +
+  geom_text(data = low_weekdays_df, aes(y = n_rides + 15), 
+            size = 2, color = 'black') +
+  geom_point() 
+```
 
 # The power of facets
+
+## facet_wrap
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides)) +
+  geom_point() + 
+  geom_line() +
+  facet_wrap( ~ day_of_week)
+```
+
+## facet_grid {.smaller}
+```{r, fig.height = 3}
+durham_voters_df %>%
+  group_by(race_code, gender_code, age) %>%
+  summarize(n_voters = n(),
+            n_rep = sum(party == 'REP')) %>%
+  filter(gender_code %in% c('F','M') & 
+           race_code %in% c('W', 'B', 'A') &
+           age != 'Age < 18 Or Invalid Birth Date') %>%
+  ggplot(aes(x = age, y = n_voters)) +
+  geom_bar(stat = 'identity') +
+  facet_grid(race_code ~ gender_code)
+```
+
+## Free scales {.smaller}
+```{r, fig.height = 3}
+durham_voters_df %>%
+  group_by(race_code, gender_code, age) %>%
+  summarize(n_voters = n(),
+            n_rep = sum(party == 'REP')) %>%
+  filter(gender_code %in% c('F','M') & 
+           race_code %in% c('W', 'B', 'A') &
+           age != 'Age < 18 Or Invalid Birth Date') %>%
+  ggplot(aes(x = age, y = n_voters)) +
+  geom_bar(stat = 'identity') +
+  facet_grid(race_code ~ gender_code, scales = 'free_y')
+```
+
+## Facets + layers {.smaller}
+```{r, fig.height = 4, echo = FALSE}
+durham_voters_df %>%
+  group_by(race_code, gender_code, age) %>%
+  summarize(n_voters = n(),
+            n_rep = sum(party == 'REP')) %>%
+  filter(gender_code %in% c('F','M') & 
+           race_code %in% c('W', 'B', 'A') &
+           age != 'Age < 18 Or Invalid Birth Date') %>%
+  mutate(age_cat = as.numeric(as.factor(age))) %>%
+  ggplot(aes(x = age, y = n_voters)) +
+  geom_point() +
+  geom_line(aes(x = age_cat)) +
+  geom_line(aes(x = age_cat, y = n_rep), color = 'red') +
+  geom_point(aes(y = n_rep), color = 'red') +
+  facet_grid(race_code ~ gender_code, scales = 'free_y') +
+  expand_limits(y = 0) 
+```
+
+## Facets + layers {.smaller}
+
+Note: better to use gather
+
+```{r, fig.height = 3, eval = FALSE}
+durham_voters_df %>%
+  group_by(race_code, gender_code, age) %>%
+  summarize(n_voters = n(),
+            n_rep = sum(party == 'REP')) %>%
+  filter(gender_code %in% c('F','M') & 
+           race_code %in% c('W', 'B', 'A') &
+           age != 'Age < 18 Or Invalid Birth Date') %>%
+  mutate(age_cat = as.numeric(as.factor(age))) %>%
+  ggplot(aes(x = age, y = n_voters)) +
+  geom_point() +
+  geom_line(aes(x = age_cat)) +
+  geom_line(aes(x = age_cat, y = n_rep), color = 'red') +
+  geom_point(aes(y = n_rep), color = 'red') +
+  facet_grid(race_code ~ gender_code, scales = 'free_y') +
+  expand_limits(y = 0) 
+```
+
+
 
 # Everyday conveniences
 
 ## Labels and titles
 
+```{r, fig.height = 3}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_smooth(span = .2, se = FALSE) +
+  xlab('') +
+  ylab('# of Transit Rides') +
+  ggtitle('Transit Rides over time by Day of Week') +
+  scale_color_discrete('Day of Week')
+```
+
 # Scales and legends
+
+## Scale transformation
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point() +
+  scale_y_reverse()
+```
+
+## Scale transformation
+
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point() +
+  scale_y_sqrt()
+```
+
+## Scale details
+
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point() +
+  scale_y_continuous(breaks = c(0, 200, 500))
+```
 
 # Themes and refinements
 
+## Overall Themes
+
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point() +
+  theme_bw()
+```
+
+## Overall Themes
+
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point() +
+  theme_dark()
+```
+
+## Changing Details
+
+```{r, fig.height = 4}
+daily_df %>%
+  ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+  geom_point() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Themes Vignette
+
+To really master themes:
+
+- http://docs.ggplot2.org/dev/vignettes/themes.html
+
+# Documentation
+
+## Online Docs
+
+Better than the regular documentation:
+
+- http://docs.ggplot2.org/current/
+
 # Extensions
+
+## Contributed extensions
+
+Check it out!
+
+- http://www.ggplot2-exts.org/
+
+# Questions?
+
+## Next Meetup
+
+Monday, November 14th, 6pm
+
+Location:
+
+- TransLoc, near RTP
+- 4505 Emperor Blvd, Durham
+- Parking is easy!
+
+Topic:
+
+- Getting data _into_ R
+
+Topic/format suggestions?
