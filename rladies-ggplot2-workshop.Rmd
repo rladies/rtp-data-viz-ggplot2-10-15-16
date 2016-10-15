@@ -1,0 +1,239 @@
+---
+title: "R-Ladies RTP ggplot2 Workshop"
+author: "Elaine McVey"
+date: "October 15, 2016"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Welcome to R-Ladies RTP!
+
+## Outline
+
+- Why ggplot2?
+- Conceptual ggplot2
+- Basic ggplot2 syntax
+- Common pitfalls
+- The power of layers
+- The power of groups
+- The power of facets
+- Scales and legends
+- Themes and refinements
+- Extensions
+
+## Materials
+
+- All source code at https://github.com/rladies/rtp-data-viz-ggplot2-10-15-16
+
+- Slides at 
+
+## Datasets
+
+- Datasets for today are here: https://www.dropbox.com/s/zhmn02ti0ggxdj7/rladies_ggplot2_datasets.rda?dl=1
+
+  - You can download them from R:
+  
+      `download.file(
+      'https://www.dropbox.com/s/zhmn02ti0ggxdj7/
+       rladies_ggplot2_datasets.rda?dl=1',
+              'rladies_ggplot2_datasets.rda')`
+              
+      `attach('rladies_ggplot2_datasets.rda')`
+  
+## Dataset Descriptions
+
+- Transit ride data
+  - rides_df: one row per ride
+  - daily_df: daily summary of rides
+  - hourly_df: hourly summary of rides
+  
+- Durham registered voter data
+  - durham_voters_df: one row per voter
+
+# Why ggplot2?
+
+## Exploratory Power
+
+- explore data very quickly, and don't screw up
+- graphics "pit of success"
+- refine plots to be publication quality  
+
+## Conceptually Cohesive
+
+- based on the grammar of graphics
+- principles and patterns
+- very complex plots from simple building blocks
+
+## Dominance
+
+- the most prominent static graphics package in R
+- help is easy to find
+- developers are contibuting extensions
+
+# Conceptual ggplot2
+
+
+
+# Basic ggplot2 syntax
+
+## The required elements
+
+- DATA
+- MAPPING
+- GEOM
+
+## Our first hands-on example ...
+
+```{r, message=FALSE} 
+download.file(
+'https://www.dropbox.com/s/zhmn02ti0ggxdj7/rladies_ggplot2_datasets.rda?dl=1',
+        'rladies_ggplot2_datasets.rda')
+        
+attach('rladies_ggplot2_datasets.rda')
+
+library(tidyverse)
+```
+
+
+## Basic plot
+
+
+```{r}
+
+ggplot(data = daily_df) +
+geom_point(mapping = aes(x = ride_date, y = n_rides))
+
+```
+
+## Mappings can be general
+
+```{r}
+
+ggplot(data = daily_df, mapping = aes(x = ride_date, y = n_rides)) +
+geom_point()
+
+```
+
+## Parameters can be unnamed
+
+```{r}
+
+ggplot(daily_df, aes(x = ride_date, y = n_rides)) +
+geom_point()
+
+```
+
+## Data can be passed in
+
+```{r, fig.height = 4}
+
+daily_df %>%
+ggplot(aes(x = ride_date, y = n_rides)) +
+geom_point()
+
+```
+
+## Data can be passed in
+
+```{r, fig.height = 4}
+
+daily_df %>%
+ggplot(aes(x = ride_date, y = n_rides)) +
+geom_point()
+
+```
+
+## Mapping is more than x and y
+
+```{r, fig.height = 4}
+
+daily_df %>%
+ggplot(aes(x = ride_date, y = n_rides, color = day_of_week)) +
+geom_point()
+
+```
+
+## Mapping is more than x and y
+
+```{r, fig.height = 4}
+
+daily_df %>%
+ggplot(aes(x = ride_date, y = n_rides, size = n_riders)) +
+geom_point()
+
+```
+
+## Variable creation on the fly...
+
+```{r, fig.height = 4}
+
+daily_df %>%
+ggplot(aes(x = ride_date, y = n_rides, color = day_of_week %in% c('Sat', 'Sun'))) +
+geom_point()
+
+```
+
+## ... or passed in
+
+```{r, fig.height = 3}
+
+daily_df %>%
+  mutate(day_type = if_else(day_of_week %in% c('Sat', 'Sun'),
+                            'Weekend',
+                            'Weekday')) %>%
+ggplot(aes(x = ride_date, y = n_rides, color = day_type)) +
+geom_point()
+
+```
+
+# Common early pitfalls
+
+## Mappings that aren't
+
+```{r, fig.height = 4}
+
+daily_df %>%
+ggplot() +
+geom_point(aes(x = ride_date, y = n_rides, color = 'blue'))
+
+```
+
+## Mappings that aren't
+
+```{r, fig.height = 4}
+
+daily_df %>%
+ggplot() +
+geom_point(aes(x = ride_date, y = n_rides), color = 'blue')
+
+```
+
+## + and %>%
+
+`
+daily_df %>%
+  mutate(day_type = if_else(day_of_week %in% c('Sat', 'Sun'),
+                            'Weekend',
+                            'Weekday')) %>%
+ggplot(aes(x = ride_date, y = n_rides, color = day_type)) %>%
+geom_point()
+`
+
+# The power of layers
+
+# The power of groups 
+
+# The power of facets
+
+# Everyday conveniences
+
+## Labels and titles
+
+# Scales and legends
+
+# Themes and refinements
+
+# Extensions
